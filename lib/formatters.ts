@@ -64,3 +64,23 @@ export function formatUpdatedAt(iso: string): string {
   const time = d.toLocaleTimeString('en-GB', { hour12: false }) // HH:MM:SS
   return `${date} ${time}`
 }
+
+/**
+ * Dominance 百分比格式化
+ * 57.312 → "57.3%"
+ */
+export function formatDominance(value: number): string {
+  return value.toFixed(1) + '%'
+}
+
+/**
+ * TVL / Stablecoin 市值格式化（十亿美元输入）
+ * 172.8 → "$172.8B"
+ * 1200  → "$1.20T"
+ */
+export function formatTVL(valueB: number): string {
+  if (valueB >= 1000) {
+    return '$' + (valueB / 1000).toFixed(2) + 'T'
+  }
+  return '$' + valueB.toFixed(1) + 'B'
+}

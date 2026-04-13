@@ -40,14 +40,23 @@ async function fetchM2Monthly(): Promise<Map<string, number>> {
   return monthMap
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const days = parseInt(searchParams.get('days') ?? '365', 10)
+
     const [btcMap, m2Map] = await Promise.all([fetchBtcMonthly(), fetchM2Monthly()])
 
     // 取两者共有的月份，按时间排序
-    const months = Array.from(m2Map.keys())
+    let months = Array.from(m2Map.keys())
       .filter((m) => btcMap.has(m))
       .sort()
+
+    // 按 days 截取：30D ≈ 1 个月，90D ≈ 3 个月，365D ≈ 12 个月
+    const monthCount = Math.ceil(days / 30)
+    if (months.length > monthCount) {
+      months = months.slice(-monthCount)
+    }
 
     const data: M2BtcData = months.map((month) => ({
       month,
@@ -57,7 +66,7 @@ export async function GET() {
 
     return NextResponse.json(
       { data, updatedAt: new Date().toISOString() },
-      { headers: { 'Cache-Control': 's-maxage=86400, stale-while-revalidate=3600' } }
+      { headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=300' } }
     )
   } catch (err) {
     return NextResponse.json(

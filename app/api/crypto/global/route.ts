@@ -17,6 +17,7 @@ export async function GET() {
       totalMarketCap: d.quote.USD.total_market_cap,
       totalMarketCapChange24h: d.quote.USD.total_market_cap_yesterday_percentage_change,
       btcDominance: d.btc_dominance,
+      ethDominance: d.eth_dominance,
       stablecoinMarketCap: d.quote.USD.stablecoin_market_cap,
     }
 

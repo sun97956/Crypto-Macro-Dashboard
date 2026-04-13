@@ -2,27 +2,17 @@
 
 import useSWR from 'swr'
 import KpiCard from './KpiCard'
-import { fetchCryptoPrices, fetchCryptoGlobal, fetchSentiment } from '@/lib/fetchers'
+import { fetchCryptoPrices, fetchCryptoGlobal } from '@/lib/fetchers'
 import { formatPrice, formatMarketCap } from '@/lib/formatters'
-import type { ApiResponse, CryptoPricesData, CryptoGlobalData, SentimentData } from '@/lib/types'
-
-const FEAR_COLOR: Record<string, 'blue' | 'yellow'> = {
-  'Extreme Fear': 'yellow',
-  'Fear': 'yellow',
-  'Neutral': 'blue',
-  'Greed': 'blue',
-  'Extreme Greed': 'blue',
-}
+import type { ApiResponse, CryptoPricesData, CryptoGlobalData } from '@/lib/types'
 
 export default function KpiSection() {
   const prices = useSWR<ApiResponse<CryptoPricesData>>('/api/crypto/prices', fetchCryptoPrices)
   const global = useSWR<ApiResponse<CryptoGlobalData>>('/api/crypto/global', fetchCryptoGlobal)
-  const sentiment = useSWR<ApiResponse<SentimentData>>('/api/sentiment', fetchSentiment)
 
   const btc = prices.data?.data.find((c) => c.symbol === 'BTC')
   const eth = prices.data?.data.find((c) => c.symbol === 'ETH')
   const g = global.data?.data
-  const latest = sentiment.data?.data.at(-1)
 
   return (
     <div className="grid grid-cols-6 gap-4 mb-6">
@@ -68,14 +58,13 @@ export default function KpiSection() {
         error={!!global.error}
       />
 
-      {/* Fear & Greed */}
+      {/* ETH Dominance */}
       <KpiCard
-        title="Fear & Greed"
-        value={latest ? String(latest.value) : '—'}
-        subLabel={latest?.classification}
-        accent={latest ? (FEAR_COLOR[latest.classification] ?? 'blue') : 'blue'}
-        loading={sentiment.isLoading}
-        error={!!sentiment.error}
+        title="ETH Dominance"
+        value={g ? `${g.ethDominance.toFixed(1)}%` : '—'}
+        accent="purple"
+        loading={global.isLoading}
+        error={!!global.error}
       />
 
       {/* Stablecoin Market Cap */}

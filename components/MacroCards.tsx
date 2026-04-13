@@ -8,8 +8,6 @@ import type { ApiResponse, MacroFredData } from '@/lib/types'
 const CARDS = [
   { key: 'FEDFUNDS' as const, label: 'Fed Funds Rate', unit: '%' },
   { key: 'DGS10' as const, label: '10Y Treasury', unit: '%' },
-  { key: 'CPIAUCSL' as const, label: 'CPI Index', unit: '' },
-  { key: 'DEXUSEU' as const, label: 'EUR / USD', unit: '' },
 ]
 
 export default function MacroCards() {

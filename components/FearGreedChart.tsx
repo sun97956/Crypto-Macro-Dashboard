@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import useSWR from 'swr'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -41,9 +42,17 @@ function CustomTooltip({ active, payload }: any) {
   )
 }
 
+const PERIODS = [
+  { label: '30D', value: '30' },
+  { label: '90D', value: '90' },
+  { label: '365D', value: '365' },
+]
+
 export default function FearGreedChart() {
+  const [limit, setLimit] = useState('30')
+
   const { data, error, isLoading } = useSWR<ApiResponse<SentimentData>>(
-    '/api/sentiment',
+    `/api/sentiment?limit=${limit}`,
     fetchSentiment
   )
 
@@ -63,15 +72,33 @@ export default function FearGreedChart() {
   return (
     <div className="rounded-lg border border-border-card bg-bg-card p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-text-primary">Fear & Greed Index</h2>
-        {latest && (
-          <span
-            className="text-sm font-mono font-semibold"
-            style={{ color: lineColor }}
-          >
-            {latest.value} — {latest.classification}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          <h2 className="text-sm font-semibold text-text-primary">Fear & Greed Index</h2>
+          {latest && (
+            <span
+              className="text-sm font-mono font-semibold"
+              style={{ color: lineColor }}
+            >
+              {latest.value} — {latest.classification}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-1">
+          {PERIODS.map(({ label, value }) => (
+            <button
+              key={value}
+              onClick={() => setLimit(value)}
+              className={clsx(
+                'px-2.5 py-1 text-xs rounded font-mono transition-colors',
+                limit === value
+                  ? 'bg-blue text-bg-page'
+                  : 'text-text-muted border border-border-card hover:border-blue hover:text-blue'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" height={240}>

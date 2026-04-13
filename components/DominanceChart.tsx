@@ -4,13 +4,12 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import clsx from 'clsx'
 import {
-  ComposedChart, Line, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts'
-import { fetchM2Btc } from '@/lib/fetchers'
-import { formatPrice, formatM2 } from '@/lib/formatters'
+import { fetchDominance } from '@/lib/fetchers'
 import { ChartSkeleton } from './Skeleton'
-import type { ApiResponse, M2BtcData } from '@/lib/types'
+import type { ApiResponse, DominanceData } from '@/lib/types'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomTooltip({ active, payload, label }: any) {
@@ -20,9 +19,7 @@ function CustomTooltip({ active, payload, label }: any) {
       <p className="text-text-muted mb-1">{label}</p>
       {payload.map((p: { name: string; value: number; color: string }) => (
         <p key={p.name} className="font-mono" style={{ color: p.color }}>
-          {p.name === 'btc'
-            ? `BTC: ${formatPrice(p.value)}`
-            : `M2: ${formatM2(p.value)}`}
+          {p.name === 'btcDominance' ? 'BTC' : 'ETH'}: {p.value?.toFixed(2)}%
         </p>
       ))}
     </div>
@@ -35,12 +32,12 @@ const PERIODS = [
   { label: '365D', value: '365' },
 ]
 
-export default function M2BtcChart() {
-  const [days, setDays] = useState('365')
+export default function DominanceChart() {
+  const [days, setDays] = useState('90')
 
-  const { data, error, isLoading } = useSWR<ApiResponse<M2BtcData>>(
-    `/api/crypto/m2btc?days=${days}`,
-    fetchM2Btc
+  const { data, error, isLoading } = useSWR<ApiResponse<DominanceData>>(
+    `/api/crypto/dominance?days=${days}`,
+    fetchDominance
   )
 
   if (isLoading) return <ChartSkeleton height={300} />
@@ -48,7 +45,7 @@ export default function M2BtcChart() {
   if (error || !data) {
     return (
       <div className="rounded-lg border border-border-card bg-bg-card p-4 h-[300px] flex items-center justify-center">
-        <p className="text-sm text-down">Failed to load M2 vs BTC data</p>
+        <p className="text-sm text-down">Failed to load dominance data</p>
       </div>
     )
   }
@@ -56,7 +53,7 @@ export default function M2BtcChart() {
   return (
     <div className="rounded-lg border border-border-card bg-bg-card p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-text-primary">M2 Money Supply vs BTC</h2>
+        <h2 className="text-sm font-semibold text-text-primary">BTC / ETH Dominance</h2>
         <div className="flex gap-1">
           {PERIODS.map(({ label, value }) => (
             <button
@@ -75,65 +72,51 @@ export default function M2BtcChart() {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={260}>
-        <ComposedChart data={data.data} margin={{ top: 4, right: 48, left: 8, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height={240}>
+        <LineChart data={data.data} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#21262D" />
           <XAxis
-            dataKey="month"
+            dataKey="date"
             tick={{ fill: '#6E7681', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(v) => v.slice(0, 7)}
-            interval={5}
+            tickFormatter={(v) => v.slice(5)}
+            interval="preserveStartEnd"
           />
-          {/* 左轴：M2（十亿美元） */}
           <YAxis
-            yAxisId="m2"
-            orientation="left"
-            tick={{ fill: '#D2A8FF', fontSize: 10 }}
+            domain={['auto', 'auto']}
+            tick={{ fill: '#6E7681', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}T`}
-            width={44}
-          />
-          {/* 右轴：BTC 价格 */}
-          <YAxis
-            yAxisId="btc"
-            orientation="right"
-            tick={{ fill: '#58A6FF', fontSize: 10 }}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+            tickFormatter={(v) => `${v}%`}
             width={44}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
             wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
             formatter={(value) => (
-              <span style={{ color: value === 'btc' ? '#58A6FF' : '#D2A8FF' }}>
-                {value === 'btc' ? 'BTC Price' : 'M2 Supply'}
+              <span style={{ color: value === 'btcDominance' ? '#58A6FF' : '#D2A8FF' }}>
+                {value === 'btcDominance' ? 'BTC Dominance' : 'ETH Dominance'}
               </span>
             )}
           />
           <Line
-            yAxisId="m2"
             type="monotone"
-            dataKey="m2"
-            stroke="#D2A8FF"
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 3 }}
-          />
-          <Line
-            yAxisId="btc"
-            type="monotone"
-            dataKey="btc"
+            dataKey="btcDominance"
             stroke="#58A6FF"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 3 }}
           />
-        </ComposedChart>
+          <Line
+            type="monotone"
+            dataKey="ethDominance"
+            stroke="#D2A8FF"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 3 }}
+          />
+        </LineChart>
       </ResponsiveContainer>
     </div>
   )

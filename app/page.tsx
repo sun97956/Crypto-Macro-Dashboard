@@ -7,12 +7,14 @@ import PriceChart from '@/components/PriceChart'
 import M2BtcChart from '@/components/M2BtcChart'
 import MacroCards from '@/components/MacroCards'
 import FearGreedChart from '@/components/FearGreedChart'
+import StockChart from '@/components/StockChart'
+import DominanceChart from '@/components/DominanceChart'
+import LiquidityChart from '@/components/LiquidityChart'
 import CoinTable from '@/components/CoinTable'
 
 export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
-  // 避免 SSR/client hydration mismatch，只在客户端初始化时间
   useEffect(() => {
     setLastUpdated(new Date())
   }, [])
@@ -33,17 +35,26 @@ export default function Home() {
         <PriceChart />
       </div>
 
-      {/* Row 3: M2 vs BTC + Macro Indicators */}
+      {/* Row 3: Fear & Greed + S&P 500 / NASDAQ */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <FearGreedChart />
+        <StockChart />
+      </div>
+
+      {/* Row 4: M2 vs BTC + Macro Indicators */}
       <div className="grid grid-cols-2 gap-6 mb-6">
         <M2BtcChart />
         <MacroCards />
       </div>
 
-      {/* Row 4: Fear & Greed + Coin Table */}
-      <div className="grid grid-cols-2 gap-6">
-        <FearGreedChart />
-        <CoinTable />
+      {/* Row 5: BTC/ETH Dominance + Stablecoin/TVL Liquidity */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <DominanceChart />
+        <LiquidityChart />
       </div>
+
+      {/* Row 6: Coin Table */}
+      <CoinTable />
     </main>
   )
 }

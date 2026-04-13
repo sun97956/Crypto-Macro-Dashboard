@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
 import { upstreamFetch } from '@/lib/upstream'
-import type { MacroFredData, FredSeries } from '@/lib/types'
+import type { MacroFredData, FredSeries, FredHistoryPoint } from '@/lib/types'
 
 const FRED_API_KEY = process.env.FRED_API_KEY!
 const BASE = 'https://api.stlouisfed.org/fred/series/observations'
-
-const SERIES = ['FEDFUNDS', 'DGS10', 'CPIAUCSL', 'DEXUSEU'] as const
 
 async function fetchSeries(id: string): Promise<FredSeries> {
   const url = `${BASE}?series_id=${id}&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=5`
@@ -17,13 +15,27 @@ async function fetchSeries(id: string): Promise<FredSeries> {
   return { value: latest.value, date: latest.date }
 }
 
+async function fetchHistory(id: string, limit = 365): Promise<FredHistoryPoint[]> {
+  const url = `${BASE}?series_id=${id}&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=${limit}`
+  const res = await upstreamFetch(url)
+  const json = await res.json()
+  const obs: Array<{ value: string; date: string }> = json.observations
+  return obs
+    .filter((o) => o.value !== '.')
+    .map((o) => ({ date: o.date, value: parseFloat(o.value) }))
+    .reverse()
+}
+
 export async function GET() {
   try {
-    const [FEDFUNDS, DGS10, CPIAUCSL, DEXUSEU] = await Promise.all(
-      SERIES.map(fetchSeries)
-    )
+    const [FEDFUNDS, DGS10, SP500, NASDAQ100] = await Promise.all([
+      fetchSeries('FEDFUNDS'),
+      fetchSeries('DGS10'),
+      fetchHistory('SP500', 365),
+      fetchHistory('NASDAQ100', 365),
+    ])
 
-    const data: MacroFredData = { FEDFUNDS, DGS10, CPIAUCSL, DEXUSEU }
+    const data: MacroFredData = { FEDFUNDS, DGS10, SP500, NASDAQ100 }
 
     return NextResponse.json(
       { data, updatedAt: new Date().toISOString() },

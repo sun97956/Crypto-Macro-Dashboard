@@ -6,6 +6,8 @@ import type {
   M2BtcData,
   MacroFredData,
   SentimentData,
+  DominanceData,
+  LiquidityData,
 } from './types'
 
 /**
@@ -40,3 +42,9 @@ export const fetchMacroFred = (url: string) =>
 
 export const fetchSentiment = (url: string) =>
   fetcher<ApiResponse<SentimentData>>(url)
+
+export const fetchDominance = (url: string) =>
+  fetcher<ApiResponse<DominanceData>>(url)
+
+export const fetchLiquidity = (url: string) =>
+  fetcher<ApiResponse<LiquidityData>>(url)

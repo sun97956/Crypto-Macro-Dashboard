@@ -26,6 +26,7 @@ export interface CryptoGlobalData {
   totalMarketCap: number
   totalMarketCapChange24h: number
   btcDominance: number
+  ethDominance: number
   stablecoinMarketCap: number
 }
 
@@ -52,11 +53,16 @@ export interface FredSeries {
   date: string
 }
 
+export interface FredHistoryPoint {
+  date: string
+  value: number
+}
+
 export interface MacroFredData {
   FEDFUNDS: FredSeries
   DGS10: FredSeries
-  CPIAUCSL: FredSeries
-  DEXUSEU: FredSeries
+  SP500: FredHistoryPoint[]
+  NASDAQ100: FredHistoryPoint[]
 }
 
 // ─── 恐贪指数 ─────────────────────────────────────────────────────
@@ -74,3 +80,32 @@ export interface FearGreedPoint {
 }
 
 export type SentimentData = FearGreedPoint[]
+
+// ─── 全球市场数据（扩展 ethDominance） ───────────────────────────
+
+// ─── BTC / ETH Dominance 历史 ─────────────────────────────────────
+export interface DominancePoint {
+  date: string
+  btcDominance: number
+  ethDominance: number
+}
+
+export type DominanceData = DominancePoint[]
+
+// ─── Stablecoin 市值 + DeFi TVL ──────────────────────────────────
+export interface LiquidityPoint {
+  date: string
+  stablecoin: number  // 单位：十亿美元
+  tvl: number         // 单位：十亿美元
+}
+
+export type LiquidityData = LiquidityPoint[]
+
+// ─── 标普 500 / 纳斯达克历史 ──────────────────────────────────────
+export interface StockPoint {
+  date: string
+  sp500: number | null
+  nasdaq: number | null
+}
+
+export type StockData = StockPoint[]
