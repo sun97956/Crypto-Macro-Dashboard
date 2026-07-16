@@ -7,8 +7,8 @@ import { formatPrice, formatMarketCap } from '@/lib/formatters'
 import type { ApiResponse, CryptoPricesData, CryptoGlobalData } from '@/lib/types'
 
 export default function KpiSection() {
-  const prices = useSWR<ApiResponse<CryptoPricesData>>('/api/crypto/prices', fetchCryptoPrices)
-  const global = useSWR<ApiResponse<CryptoGlobalData>>('/api/crypto/global', fetchCryptoGlobal)
+  const prices = useSWR<ApiResponse<CryptoPricesData>>('/api/crypto/prices', fetchCryptoPrices, { refreshInterval: 60000 })
+  const global = useSWR<ApiResponse<CryptoGlobalData>>('/api/crypto/global', fetchCryptoGlobal, { refreshInterval: 60000 })
 
   const btc = prices.data?.data.find((c) => c.symbol === 'BTC')
   const eth = prices.data?.data.find((c) => c.symbol === 'ETH')

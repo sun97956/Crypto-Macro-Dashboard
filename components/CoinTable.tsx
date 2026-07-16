@@ -24,7 +24,8 @@ function PctCell({ value }: { value: number }) {
 export default function CoinTable() {
   const { data, error, isLoading } = useSWR<ApiResponse<CryptoPricesData>>(
     '/api/crypto/prices',
-    fetchCryptoPrices
+    fetchCryptoPrices,
+    { refreshInterval: 60000 }
   )
 
   if (isLoading) return <TableSkeleton rows={6} />
