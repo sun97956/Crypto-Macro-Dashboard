@@ -67,7 +67,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') ?? '365', 10)
 
-    const [btcMap, m2Map] = await Promise.all([fetchBtcDaily(), fetchM2Weekly()])
+    // 串行拉取:sin1 运行时下 CoinGecko range + FRED 并发会互相阻塞导致超时,
+    // 分开顺序请求各自 ~1-2s 即可完成。
+    const m2Map = await fetchM2Weekly()
+    const btcMap = await fetchBtcDaily()
 
     // 对每个 M2 周度日期，找最近的 BTC 价格（±3天容差）
     const btcDates = Array.from(btcMap.keys()).sort()
