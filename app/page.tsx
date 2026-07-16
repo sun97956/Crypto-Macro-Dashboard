@@ -10,6 +10,7 @@ import FearGreedChart from '@/components/FearGreedChart'
 import StockChart from '@/components/StockChart'
 import DominanceChart from '@/components/DominanceChart'
 import LiquidityChart from '@/components/LiquidityChart'
+import EtfFlowChart from '@/components/EtfFlowChart'
 import CoinTable from '@/components/CoinTable'
 
 export default function Home() {
@@ -33,6 +34,12 @@ export default function Home() {
       {/* Row 2: BTC Price Chart */}
       <div className="mb-6">
         <PriceChart />
+      </div>
+
+      {/* Row 3: 机构需求层 — BTC / ETH ETF 净流入 */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <EtfFlowChart asset="btc" />
+        <EtfFlowChart asset="eth" />
       </div>
 
       {/* Row 3: Fear & Greed + S&P 500 / NASDAQ */}

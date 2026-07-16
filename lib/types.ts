@@ -117,6 +117,7 @@ export interface EtfFlowPoint {
   btcFlow: number        // 当日 BTC ETF 净流入,单位:百万美元
   ethFlow: number        // 当日 ETH ETF 净流入,单位:百万美元
   btcCumulative: number  // BTC ETF 累计净流入,单位:十亿美元
+  ethCumulative: number  // ETH ETF 累计净流入,单位:十亿美元
 }
 
 export type EtfFlowData = EtfFlowPoint[]

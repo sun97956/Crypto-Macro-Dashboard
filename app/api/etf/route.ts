@@ -34,9 +34,13 @@ export async function GET(request: Request) {
       fetchEtfFlow('us-eth-spot'),
     ])
 
-    // 按日期建 ETH 映射,便于与 BTC 对齐
-    const ethMap = new Map<string, number>()
-    for (const p of ethRaw) ethMap.set(p.date, p.totalNetInflow)
+    // 按日期建 ETH 映射(当日净流入 + 累计),便于与 BTC 对齐
+    const ethFlowMap = new Map<string, number>()
+    const ethCumMap = new Map<string, number>()
+    for (const p of ethRaw) {
+      ethFlowMap.set(p.date, p.totalNetInflow)
+      ethCumMap.set(p.date, p.cumNetInflow)
+    }
 
     // BTC 数据升序排列(接口返回是降序)
     const btcAsc = [...btcRaw].sort((a, b) => a.date.localeCompare(b.date))
@@ -47,9 +51,10 @@ export async function GET(request: Request) {
       .filter((p) => p.date >= cutoff)
       .map((p) => ({
         date: p.date,
-        btcFlow: p.totalNetInflow / 1e6,          // → 百万美元
-        ethFlow: (ethMap.get(p.date) ?? 0) / 1e6, // → 百万美元
-        btcCumulative: p.cumNetInflow / 1e9,      // → 十亿美元
+        btcFlow: p.totalNetInflow / 1e6,               // → 百万美元
+        ethFlow: (ethFlowMap.get(p.date) ?? 0) / 1e6,  // → 百万美元
+        btcCumulative: p.cumNetInflow / 1e9,           // → 十亿美元
+        ethCumulative: (ethCumMap.get(p.date) ?? 0) / 1e9, // → 十亿美元
       }))
 
     return NextResponse.json(

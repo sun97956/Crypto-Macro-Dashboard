@@ -2,17 +2,19 @@
 
 import useSWR from 'swr'
 import KpiCard from './KpiCard'
-import { fetchCryptoPrices, fetchCryptoGlobal } from '@/lib/fetchers'
-import { formatPrice, formatMarketCap } from '@/lib/formatters'
-import type { ApiResponse, CryptoPricesData, CryptoGlobalData } from '@/lib/types'
+import { fetchCryptoPrices, fetchCryptoGlobal, fetchEtfFlow } from '@/lib/fetchers'
+import { formatPrice, formatMarketCap, formatFlow } from '@/lib/formatters'
+import type { ApiResponse, CryptoPricesData, CryptoGlobalData, EtfFlowData } from '@/lib/types'
 
 export default function KpiSection() {
   const prices = useSWR<ApiResponse<CryptoPricesData>>('/api/crypto/prices', fetchCryptoPrices, { refreshInterval: 60000 })
   const global = useSWR<ApiResponse<CryptoGlobalData>>('/api/crypto/global', fetchCryptoGlobal, { refreshInterval: 60000 })
+  const etf = useSWR<ApiResponse<EtfFlowData>>('/api/etf?days=30', fetchEtfFlow)
 
   const btc = prices.data?.data.find((c) => c.symbol === 'BTC')
   const eth = prices.data?.data.find((c) => c.symbol === 'ETH')
   const g = global.data?.data
+  const latestEtf = etf.data?.data.at(-1)
 
   return (
     <div className="grid grid-cols-6 gap-4 mb-6">
@@ -58,13 +60,14 @@ export default function KpiSection() {
         error={!!global.error}
       />
 
-      {/* ETH Dominance */}
+      {/* BTC ETF Net Flow (latest daily) */}
       <KpiCard
-        title="ETH Dominance"
-        value={g ? `${g.ethDominance.toFixed(1)}%` : '—'}
+        title="BTC ETF Flow"
+        value={latestEtf ? formatFlow(latestEtf.btcFlow) : '—'}
+        subLabel={latestEtf ? `${latestEtf.date} · daily net` : undefined}
         accent="purple"
-        loading={global.isLoading}
-        error={!!global.error}
+        loading={etf.isLoading}
+        error={!!etf.error}
       />
 
       {/* Stablecoin Market Cap */}
