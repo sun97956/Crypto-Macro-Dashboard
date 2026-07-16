@@ -2,7 +2,7 @@
 
 一个面向加密市场的宏观数据看板，将链上价格、美联储经济数据与市场情绪整合在同一个页面，帮助你在做投资判断时快速建立宏观视角。
 
-**线上地址：** [crypto-micro-dashboard.vercel.app](https://crypto-micro-dashboard.vercel.app)
+**线上地址：** [crypto-macro-dashboard.vercel.app](https://crypto-macro-dashboard.vercel.app)
 
 ---
 
