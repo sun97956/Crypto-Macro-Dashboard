@@ -5,9 +5,11 @@ import type { M2BtcData } from '@/lib/types'
 const CG_API_KEY = process.env.COINGECKO_API_KEY!
 const FRED_API_KEY = process.env.FRED_API_KEY!
 
-// 2020-01-01 的 Unix 时间戳（秒）
-const START_TS = Math.floor(new Date('2020-01-01').getTime() / 1000)
+// 图表最长视图为 365 天,只取近 ~500 天数据即可（跨区域拉取全历史会超时）
+const LOOKBACK_DAYS = 500
 const NOW_TS = Math.floor(Date.now() / 1000)
+const START_TS = NOW_TS - LOOKBACK_DAYS * 86400
+const OBS_START = new Date(START_TS * 1000).toISOString().slice(0, 10)
 
 async function fetchBtcDaily(): Promise<Map<string, number>> {
   const url = `https://pro-api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${START_TS}&to=${NOW_TS}`
@@ -26,7 +28,7 @@ async function fetchBtcDaily(): Promise<Map<string, number>> {
 }
 
 async function fetchM2Weekly(): Promise<Map<string, number>> {
-  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&observation_start=2020-01-01`
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&observation_start=${OBS_START}`
   const res = await upstreamFetch(url)
   const json = await res.json()
 
