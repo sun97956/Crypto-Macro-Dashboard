@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import KpiSection from '@/components/KpiSection'
+import CycleStageBanner from '@/components/CycleStageBanner'
 import PriceChart from '@/components/PriceChart'
 import M2BtcChart from '@/components/M2BtcChart'
 import MacroCards from '@/components/MacroCards'
@@ -29,6 +30,9 @@ export default function Home() {
         lastUpdated={lastUpdated}
         onRefreshComplete={(date) => setLastUpdated(date)}
       />
+
+      {/* Row 0: 核心周期判断 */}
+      <CycleStageBanner />
 
       {/* Row 1: KPI Cards */}
       <KpiSection />
