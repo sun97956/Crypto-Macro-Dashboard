@@ -12,7 +12,6 @@ const FRED_API_KEY = process.env.FRED_API_KEY!
 const LOOKBACK_DAYS = 500
 const NOW_TS = Math.floor(Date.now() / 1000)
 const START_TS = NOW_TS - LOOKBACK_DAYS * 86400
-const OBS_START = new Date(START_TS * 1000).toISOString().slice(0, 10)
 
 // 跨区域上游偶发超时,重试一次（每次 10s 超时）
 async function fetchWithRetry(
@@ -48,8 +47,9 @@ async function fetchBtcDaily(): Promise<Map<string, number>> {
 }
 
 async function fetchM2Weekly(): Promise<Map<string, number>> {
-  // 与可靠工作的 /api/macro/fred 保持一致的查询形态（desc + limit）
-  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&observation_start=${OBS_START}&sort_order=desc&limit=120`
+  // 完全对齐可靠工作的 /api/macro/fred fetchHistory 形态（仅 desc + limit,
+  // 不带 observation_start——带上后该请求在 sin1 运行时会莫名超时）
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=120`
   const res = await fetchWithRetry(url)
   const json = await res.json()
 
