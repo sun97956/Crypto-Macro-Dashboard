@@ -11,6 +11,8 @@ import StockChart from '@/components/StockChart'
 import DominanceChart from '@/components/DominanceChart'
 import LiquidityChart from '@/components/LiquidityChart'
 import EtfFlowChart from '@/components/EtfFlowChart'
+import DerivativesChart from '@/components/DerivativesChart'
+import LongShortGauge from '@/components/LongShortGauge'
 import CoinTable from '@/components/CoinTable'
 
 export default function Home() {
@@ -40,6 +42,14 @@ export default function Home() {
       <div className="grid grid-cols-2 gap-6 mb-6">
         <EtfFlowChart asset="btc" />
         <EtfFlowChart asset="eth" />
+      </div>
+
+      {/* Row 4: 市场结构层 — 资金费率+OI / 多空持仓 */}
+      <div className="grid grid-cols-3 gap-6 mb-6">
+        <div className="col-span-2">
+          <DerivativesChart />
+        </div>
+        <LongShortGauge />
       </div>
 
       {/* Row 3: Fear & Greed + S&P 500 / NASDAQ */}
