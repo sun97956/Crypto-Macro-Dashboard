@@ -56,25 +56,25 @@ export default function Home() {
         <LongShortGauge />
       </div>
 
-      {/* Row 3: Fear & Greed + S&P 500 / NASDAQ */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <FearGreedChart />
-        <StockChart />
-      </div>
-
-      {/* Row 4: M2 vs BTC + Macro Indicators */}
+      {/* Row 5: 流动性层 — M2 vs BTC / 宏观(利率·美债·DXY) */}
       <div className="grid grid-cols-2 gap-6 mb-6">
         <M2BtcChart />
         <MacroCards />
       </div>
 
-      {/* Row 5: BTC/ETH Dominance + Stablecoin/TVL Liquidity */}
+      {/* Row 6: 资金流入 + 风险偏好 — 稳定币/TVL / BTC·ETH 占比 */}
       <div className="grid grid-cols-2 gap-6 mb-6">
-        <DominanceChart />
         <LiquidityChart />
+        <DominanceChart />
       </div>
 
-      {/* Row 6: Coin Table */}
+      {/* Row 7: 情绪 + 股市联动 — 恐贪指数 / 标普·纳指 */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <FearGreedChart />
+        <StockChart />
+      </div>
+
+      {/* Row 8: 市场总览 */}
       <CoinTable />
     </main>
   )
