@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { upstreamFetch } from '@/lib/upstream'
 import type { M2BtcData } from '@/lib/types'
 
+// 允许函数最长运行 30s（sin1↔FRED 偶发高延迟需要重试余量）
+export const maxDuration = 30
+
 const CG_API_KEY = process.env.COINGECKO_API_KEY!
 const FRED_API_KEY = process.env.FRED_API_KEY!
 
@@ -11,9 +14,26 @@ const NOW_TS = Math.floor(Date.now() / 1000)
 const START_TS = NOW_TS - LOOKBACK_DAYS * 86400
 const OBS_START = new Date(START_TS * 1000).toISOString().slice(0, 10)
 
+// 跨区域上游偶发超时,重试一次（每次 10s 超时）
+async function fetchWithRetry(
+  url: string,
+  options?: RequestInit,
+  attempts = 2
+): Promise<Response> {
+  let lastErr: unknown
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await upstreamFetch(url, options, 10000)
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw lastErr
+}
+
 async function fetchBtcDaily(): Promise<Map<string, number>> {
   const url = `https://pro-api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${START_TS}&to=${NOW_TS}`
-  const res = await upstreamFetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: { 'x-cg-pro-api-key': CG_API_KEY },
   })
   const json = await res.json()
@@ -28,8 +48,9 @@ async function fetchBtcDaily(): Promise<Map<string, number>> {
 }
 
 async function fetchM2Weekly(): Promise<Map<string, number>> {
-  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&observation_start=${OBS_START}`
-  const res = await upstreamFetch(url)
+  // 与可靠工作的 /api/macro/fred 保持一致的查询形态（desc + limit）
+  const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&observation_start=${OBS_START}&sort_order=desc&limit=120`
+  const res = await fetchWithRetry(url)
   const json = await res.json()
 
   const dateMap = new Map<string, number>()
