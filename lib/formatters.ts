@@ -84,3 +84,35 @@ export function formatTVL(valueB: number): string {
   }
   return '$' + valueB.toFixed(1) + 'B'
 }
+
+/**
+ * ETF 净流入格式化（百万美元输入，带正负号）
+ * 181.1  → "+$181.1M"
+ * -424.7 → "-$424.7M"
+ * 1234   → "+$1.23B"
+ */
+export function formatFlow(valueM: number): string {
+  const sign = valueM > 0 ? '+' : valueM < 0 ? '-' : ''
+  const abs = Math.abs(valueM)
+  if (abs >= 1000) {
+    return `${sign}$${(abs / 1000).toFixed(2)}B`
+  }
+  return `${sign}$${abs.toFixed(1)}M`
+}
+
+/**
+ * 未平仓量格式化（十亿美元输入）
+ * 1.988 → "$1.99B"
+ */
+export function formatOI(valueB: number): string {
+  return '$' + valueB.toFixed(2) + 'B'
+}
+
+/**
+ * 资金费率格式化（百分比输入，8h）
+ * 0.0081 → "0.008%"
+ * -0.012 → "-0.012%"
+ */
+export function formatFunding(pct: number): string {
+  return pct.toFixed(3) + '%'
+}

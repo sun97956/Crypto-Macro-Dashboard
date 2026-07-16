@@ -8,6 +8,9 @@ import type {
   SentimentData,
   DominanceData,
   LiquidityData,
+  EtfFlowData,
+  DerivativesData,
+  SignalData,
 } from './types'
 
 /**
@@ -48,3 +51,12 @@ export const fetchDominance = (url: string) =>
 
 export const fetchLiquidity = (url: string) =>
   fetcher<ApiResponse<LiquidityData>>(url)
+
+export const fetchEtfFlow = (url: string) =>
+  fetcher<ApiResponse<EtfFlowData>>(url)
+
+export const fetchDerivatives = (url: string) =>
+  fetcher<ApiResponse<DerivativesData>>(url)
+
+export const fetchSignal = (url: string) =>
+  fetcher<ApiResponse<SignalData>>(url)

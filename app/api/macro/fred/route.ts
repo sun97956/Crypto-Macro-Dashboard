@@ -28,14 +28,15 @@ async function fetchHistory(id: string, limit = 365): Promise<FredHistoryPoint[]
 
 export async function GET() {
   try {
-    const [FEDFUNDS, DGS10, SP500, NASDAQ100] = await Promise.all([
+    const [FEDFUNDS, DGS10, DXY, SP500, NASDAQ100] = await Promise.all([
       fetchSeries('FEDFUNDS'),
       fetchSeries('DGS10'),
+      fetchHistory('DTWEXBGS', 365),
       fetchHistory('SP500', 365),
       fetchHistory('NASDAQ100', 365),
     ])
 
-    const data: MacroFredData = { FEDFUNDS, DGS10, SP500, NASDAQ100 }
+    const data: MacroFredData = { FEDFUNDS, DGS10, DXY, SP500, NASDAQ100 }
 
     return NextResponse.json(
       { data, updatedAt: new Date().toISOString() },

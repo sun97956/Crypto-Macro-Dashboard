@@ -61,6 +61,7 @@ export interface FredHistoryPoint {
 export interface MacroFredData {
   FEDFUNDS: FredSeries
   DGS10: FredSeries
+  DXY: FredHistoryPoint[]
   SP500: FredHistoryPoint[]
   NASDAQ100: FredHistoryPoint[]
 }
@@ -109,3 +110,41 @@ export interface StockPoint {
 }
 
 export type StockData = StockPoint[]
+
+// ─── ETF 净流入 ───────────────────────────────────────────────────
+export interface EtfFlowPoint {
+  date: string
+  btcFlow: number        // 当日 BTC ETF 净流入,单位:百万美元
+  ethFlow: number        // 当日 ETH ETF 净流入,单位:百万美元
+  btcCumulative: number  // BTC ETF 累计净流入,单位:十亿美元
+}
+
+export type EtfFlowData = EtfFlowPoint[]
+
+// ─── 衍生品市场结构 ───────────────────────────────────────────────
+export interface DerivativesPoint {
+  date: string
+  fundingRate: number | null    // 资金费率,百分比(如 0.01 = 0.01%);无数据为 null
+  openInterest: number          // 未平仓量名义美元,单位:十亿
+  longShortRatio: number | null // 多空持仓人数比;无数据为 null
+}
+
+export type DerivativesData = DerivativesPoint[]
+
+// ─── 综合周期信号 ─────────────────────────────────────────────────
+export type CycleStage = 'Risk-On' | 'Neutral' | 'Risk-Off'
+
+export interface SignalLayer {
+  name: string                              // 层级名,如"流动性"
+  score: number                             // -1 ~ +1
+  signal: 'bullish' | 'neutral' | 'bearish'
+  detail: string                            // 一句话解读
+}
+
+export interface CycleSignal {
+  stage: CycleStage
+  score: number                             // -100 ~ +100 综合分
+  layers: SignalLayer[]
+}
+
+export type SignalData = CycleSignal
