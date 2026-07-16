@@ -16,6 +16,17 @@ import DerivativesChart from '@/components/DerivativesChart'
 import LongShortGauge from '@/components/LongShortGauge'
 import CoinTable from '@/components/CoinTable'
 
+function SectionLabel({ index, zh, en }: { index: string; zh: string; en: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-3 mt-2">
+      <span className="text-blue font-mono text-sm font-semibold">{index}</span>
+      <h2 className="text-sm font-semibold text-text-primary">{zh}</h2>
+      <span className="text-xs text-text-muted uppercase tracking-widest">{en}</span>
+      <div className="flex-1 h-px bg-border-card" />
+    </div>
+  )
+}
+
 export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
@@ -25,56 +36,60 @@ export default function Home() {
 
   return (
     <main className="min-w-[1280px] min-h-screen bg-bg-page text-text-primary px-8 py-6">
-      {/* Header */}
       <Header
         lastUpdated={lastUpdated}
         onRefreshComplete={(date) => setLastUpdated(date)}
       />
 
-      {/* Row 0: 核心周期判断 */}
+      {/* 顶部:综合周期判断 */}
       <CycleStageBanner />
 
-      {/* Row 1: KPI Cards */}
+      {/* KPI 快照 */}
       <KpiSection />
 
-      {/* Row 2: BTC Price Chart */}
-      <div className="mb-6">
+      {/* BTC 价格 */}
+      <div className="mb-8">
         <PriceChart />
       </div>
 
-      {/* Row 3: 机构需求层 — BTC / ETH ETF 净流入 */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      {/* ① 宏观环境:利率 / 通胀 / 美元 / 美股 —— 传导链最上游 */}
+      <SectionLabel index="①" zh="宏观环境" en="Macro Backdrop" />
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <MacroCards />
+        <StockChart />
+      </div>
+
+      {/* ② 机构需求:BTC / ETH 现货 ETF 净流入 —— 资金进出加密的主通道 */}
+      <SectionLabel index="②" zh="机构需求" en="Institutional Demand" />
+      <div className="grid grid-cols-2 gap-6 mb-8">
         <EtfFlowChart asset="btc" />
         <EtfFlowChart asset="eth" />
       </div>
 
-      {/* Row 4: 市场结构层 — 资金费率+OI / 多空持仓 */}
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      {/* ③ 流动性:全球 M2 / 链上稳定币 + DeFi TVL */}
+      <SectionLabel index="③" zh="流动性" en="Liquidity" />
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <M2BtcChart />
+        <LiquidityChart />
+      </div>
+
+      {/* ④ 市场结构:资金费率 + 未平仓量 / 多空持仓 —— 杠杆状态 */}
+      <SectionLabel index="④" zh="市场结构" en="Market Structure" />
+      <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="col-span-2">
           <DerivativesChart />
         </div>
         <LongShortGauge />
       </div>
 
-      {/* Row 5: 流动性层 — M2 vs BTC / 宏观(利率·美债·DXY) */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <M2BtcChart />
-        <MacroCards />
-      </div>
-
-      {/* Row 6: 资金流入 + 风险偏好 — 稳定币/TVL / BTC·ETH 占比 */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
-        <LiquidityChart />
+      {/* ⑤ 轮动与情绪:BTC/ETH 占比 / 恐贪指数 —— 传导链末端 */}
+      <SectionLabel index="⑤" zh="轮动与情绪" en="Rotation & Sentiment" />
+      <div className="grid grid-cols-2 gap-6 mb-8">
         <DominanceChart />
-      </div>
-
-      {/* Row 7: 情绪 + 股市联动 — 恐贪指数 / 标普·纳指 */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
         <FearGreedChart />
-        <StockChart />
       </div>
 
-      {/* Row 8: 市场总览 */}
+      {/* 市场总览 */}
       <CoinTable />
     </main>
   )

@@ -61,7 +61,9 @@ export interface FredHistoryPoint {
 export interface MacroFredData {
   FEDFUNDS: FredSeries
   DGS10: FredSeries
-  DXY: FredHistoryPoint[]
+  CPI: FredSeries      // CPI 同比 %(YoY)
+  PPI: FredSeries      // PPI 最终需求 同比 %(YoY)
+  DXY: FredHistoryPoint[]  // 真实 ICE 美元指数(Yahoo DX-Y.NYB)
   SP500: FredHistoryPoint[]
   NASDAQ100: FredHistoryPoint[]
 }
