@@ -60,8 +60,8 @@ export default function LongShortGauge() {
           <div style={{ width: `${shortShare}%`, backgroundColor: DOWN }} />
         </div>
         <div className="flex justify-between text-[10px] font-mono">
-          <span style={{ color: UP }}>多 {longShare.toFixed(0)}%</span>
-          <span style={{ color: DOWN }}>空 {shortShare.toFixed(0)}%</span>
+          <span style={{ color: UP }}>Long {longShare.toFixed(0)}%</span>
+          <span style={{ color: DOWN }}>Short {shortShare.toFixed(0)}%</span>
         </div>
       </div>
 
@@ -78,12 +78,12 @@ export default function LongShortGauge() {
 
       <p className="text-[11px] text-text-muted leading-relaxed">
         {ratio > 1.2
-          ? '账户偏多,多头情绪占优'
+          ? 'Accounts skew long, bullish positioning'
           : ratio < 0.85
-          ? '账户偏空,空头情绪占优'
-          : '多空相对均衡'}
+          ? 'Accounts skew short, bearish positioning'
+          : 'Longs and shorts roughly balanced'}
         {' · '}
-        {fundingPositive ? '多头付费给空头,趋势偏多' : '空头付费给多头,趋势偏空'}
+        {fundingPositive ? 'Longs pay shorts, trend leans long' : 'Shorts pay longs, trend leans short'}
       </p>
     </div>
   )

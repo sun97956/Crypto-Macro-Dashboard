@@ -39,10 +39,10 @@ function makeTooltip(flowKey: string, cumKey: string, label: string) {
       <div className="bg-bg-card border border-border-card rounded px-3 py-2 text-xs">
         <p className="text-text-muted mb-1">{date}</p>
         <p className="font-mono" style={{ color: flow >= 0 ? UP : DOWN }}>
-          {label} 净流入: {formatFlow(flow)}
+          {label} net flow: {formatFlow(flow)}
         </p>
         <p className="font-mono" style={{ color: LINE }}>
-          累计: ${cum?.toFixed(1)}B
+          Cumulative: ${cum?.toFixed(1)}B
         </p>
       </div>
     )
@@ -132,7 +132,7 @@ export default function EtfFlowChart({ asset }: Props) {
             wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
             formatter={(value) => (
               <span className="text-text-muted">
-                {value === flowKey ? '每日净流入' : '累计净流入'}
+                {value === flowKey ? 'Daily net flow' : 'Cumulative'}
               </span>
             )}
           />

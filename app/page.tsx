@@ -16,12 +16,12 @@ import DerivativesChart from '@/components/DerivativesChart'
 import LongShortGauge from '@/components/LongShortGauge'
 import CoinTable from '@/components/CoinTable'
 
-function SectionLabel({ index, zh, en }: { index: string; zh: string; en: string }) {
+function SectionLabel({ index, title, note }: { index: string; title: string; note: string }) {
   return (
     <div className="flex items-center gap-3 mb-3 mt-2">
       <span className="text-blue font-mono text-sm font-semibold">{index}</span>
-      <h2 className="text-sm font-semibold text-text-primary">{zh}</h2>
-      <span className="text-xs text-text-muted uppercase tracking-widest">{en}</span>
+      <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
+      <span className="text-xs text-text-muted">{note}</span>
       <div className="flex-1 h-px bg-border-card" />
     </div>
   )
@@ -52,29 +52,29 @@ export default function Home() {
         <PriceChart />
       </div>
 
-      {/* ① 宏观环境:利率 / 通胀 / 美元 / 美股 —— 传导链最上游 */}
-      <SectionLabel index="①" zh="宏观环境" en="Macro Backdrop" />
+      {/* Macro backdrop: rates / inflation / dollar / equities — top of the chain */}
+      <SectionLabel index="①" title="Macro Backdrop" note="Rates · Inflation · Dollar · Equities" />
       <div className="grid grid-cols-2 gap-6 mb-8">
         <MacroCards />
         <StockChart />
       </div>
 
-      {/* ② 机构需求:BTC / ETH 现货 ETF 净流入 —— 资金进出加密的主通道 */}
-      <SectionLabel index="②" zh="机构需求" en="Institutional Demand" />
+      {/* Institutional demand: BTC / ETH spot ETF flows — the main channel into crypto */}
+      <SectionLabel index="②" title="Institutional Demand" note="BTC · ETH spot ETF flows" />
       <div className="grid grid-cols-2 gap-6 mb-8">
         <EtfFlowChart asset="btc" />
         <EtfFlowChart asset="eth" />
       </div>
 
-      {/* ③ 流动性:全球 M2 / 链上稳定币 + DeFi TVL */}
-      <SectionLabel index="③" zh="流动性" en="Liquidity" />
+      {/* Liquidity: global M2 / on-chain stablecoins + DeFi TVL */}
+      <SectionLabel index="③" title="Liquidity" note="Global M2 · Stablecoins · DeFi TVL" />
       <div className="grid grid-cols-2 gap-6 mb-8">
         <M2BtcChart />
         <LiquidityChart />
       </div>
 
-      {/* ④ 市场结构:资金费率 + 未平仓量 / 多空持仓 —— 杠杆状态 */}
-      <SectionLabel index="④" zh="市场结构" en="Market Structure" />
+      {/* Market structure: funding + open interest / positioning — leverage state */}
+      <SectionLabel index="④" title="Market Structure" note="Funding · Open Interest · Positioning" />
       <div className="grid grid-cols-3 gap-6 mb-8">
         <div className="col-span-2">
           <DerivativesChart />
@@ -82,8 +82,8 @@ export default function Home() {
         <LongShortGauge />
       </div>
 
-      {/* ⑤ 轮动与情绪:BTC/ETH 占比 / 恐贪指数 —— 传导链末端 */}
-      <SectionLabel index="⑤" zh="轮动与情绪" en="Rotation & Sentiment" />
+      {/* Rotation & sentiment: BTC/ETH dominance / Fear & Greed — end of the chain */}
+      <SectionLabel index="⑤" title="Rotation & Sentiment" note="Dominance · Fear & Greed" />
       <div className="grid grid-cols-2 gap-6 mb-8">
         <DominanceChart />
         <FearGreedChart />

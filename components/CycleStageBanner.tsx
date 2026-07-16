@@ -13,9 +13,9 @@ import type {
 } from '@/lib/types'
 
 const STAGE_STYLE = {
-  'Risk-On': { color: '#3FB950', label: 'RISK-ON', sub: '风险偏好上行,顺风环境' },
-  Neutral: { color: '#E3B341', label: 'NEUTRAL', sub: '多空交织,信号分化' },
-  'Risk-Off': { color: '#F85149', label: 'RISK-OFF', sub: '风险偏好收缩,逆风环境' },
+  'Risk-On': { color: '#3FB950', label: 'RISK-ON', sub: 'Risk appetite rising — tailwind' },
+  Neutral: { color: '#E3B341', label: 'NEUTRAL', sub: 'Mixed signals — diverging' },
+  'Risk-Off': { color: '#F85149', label: 'RISK-OFF', sub: 'Risk appetite contracting — headwind' },
 }
 
 const DOT = {
@@ -66,7 +66,7 @@ export default function CycleStageBanner() {
               {anyLoading ? '' : (signal.score > 0 ? '+' : '') + signal.score}
             </span>
           </div>
-          <p className="text-xs text-text-muted mt-1">{anyLoading ? '综合各层信号计算中…' : style.sub}</p>
+          <p className="text-xs text-text-muted mt-1">{anyLoading ? 'Computing composite signal…' : style.sub}</p>
 
           {/* 综合分刻度条 -100 ~ +100 */}
           <div className="mt-4">
@@ -106,7 +106,7 @@ export default function CycleStageBanner() {
                 </span>
               </div>
               <p className="text-[11px] text-text-muted leading-snug pl-4">
-                {anyLoading ? '加载中…' : layer.detail}
+                {anyLoading ? 'Loading…' : layer.detail}
               </p>
             </div>
           ))}

@@ -27,131 +27,132 @@ function toSignal(score: number): 'bullish' | 'neutral' | 'bearish' {
 
 // ─── 各层打分(score ∈ -1 ~ +1) ─────────────────────────────────
 
-/** 流动性:美元指数走弱 = 流动性宽松 = 利多 */
+/** Liquidity: weaker dollar = easier liquidity = bullish */
 export function scoreLiquidity(fred?: MacroFredData): SignalLayer {
-  const name = '流动性'
+  const name = 'Liquidity'
   const dxy = fred?.DXY ?? []
   if (dxy.length < 30)
-    return { name, score: 0, signal: 'neutral', detail: '美元指数数据不足' }
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient dollar index data' }
   const win = dxy.slice(-90)
   const change = pctChange(win[0].value, win[win.length - 1].value)
-  const score = clamp(-change * 20) // DXY 跌 5% → +1
+  const score = clamp(-change * 20) // DXY down 5% → +1
   const pct = (change * 100).toFixed(1)
   return {
     name,
     score,
     signal: toSignal(score),
-    detail: `美元指数 ${change >= 0 ? '走强' : '走弱'} ${Math.abs(+pct)}%,流动性${change >= 0 ? '收紧' : '宽松'}`,
+    detail: `Dollar index ${change >= 0 ? 'up' : 'down'} ${Math.abs(+pct)}%, liquidity ${change >= 0 ? 'tightening' : 'easing'}`,
   }
 }
 
-/** 机构需求:BTC ETF 近 7 日累计净流入 */
+/** Institutional demand: BTC ETF net flow over the last 7 days */
 export function scoreInstitutional(etf?: EtfFlowData): SignalLayer {
-  const name = '机构需求'
+  const name = 'Institutional'
   if (!etf || etf.length === 0)
-    return { name, score: 0, signal: 'neutral', detail: 'ETF 数据不足' }
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient ETF data' }
   const last7 = etf.slice(-7)
-  const sum = last7.reduce((a, b) => a + b.btcFlow, 0) // 百万美元
+  const sum = last7.reduce((a, b) => a + b.btcFlow, 0) // USD millions
   const score = clamp(sum / 3000) // ±$3B/7d → ±1
   return {
     name,
     score,
     signal: toSignal(score),
-    detail: `BTC ETF 近 7 日净流入 ${formatFlow(sum)},机构${sum >= 0 ? '买入' : '卖出'}`,
+    detail: `BTC ETF 7d net flow ${formatFlow(sum)}, institutions ${sum >= 0 ? 'buying' : 'selling'}`,
   }
 }
 
 /**
- * 资金流入:以稳定币供应为主信号(价格稳定,增减反映真实资金进出),
- * DeFi TVL 为次要参考且限幅——TVL 以美元计价会被币价放大,不宜主导。
+ * Capital flow: stablecoin supply is the primary signal (price-stable, so
+ * changes reflect real capital in/out); DeFi TVL is secondary and capped
+ * because USD-denominated TVL is inflated by price moves.
  */
 export function scoreCapitalFlow(liq?: LiquidityData): SignalLayer {
-  const name = '资金流入'
+  const name = 'Capital Flow'
   if (!liq || liq.length < 2)
-    return { name, score: 0, signal: 'neutral', detail: '链上流动性数据不足' }
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient on-chain data' }
   const stableChg = pctChange(liq[0].stablecoin, liq[liq.length - 1].stablecoin)
   const tvlChg = pctChange(liq[0].tvl, liq[liq.length - 1].tvl)
-  // 稳定币主导(±5% → ±1);TVL 先限幅到 ±20% 再小权重叠加
+  // Stablecoin-dominant (±5% → ±1); TVL clamped to ±20% then small weight
   const score = clamp(stableChg * 20 + clamp(tvlChg, -0.2, 0.2) * 1.5)
   return {
     name,
     score,
     signal: toSignal(score),
-    detail: `稳定币供应 ${(stableChg * 100).toFixed(1)}%(主) · DeFi TVL ${(tvlChg * 100).toFixed(1)}%`,
+    detail: `Stablecoin supply ${(stableChg * 100).toFixed(1)}% (primary) · DeFi TVL ${(tvlChg * 100).toFixed(1)}%`,
   }
 }
 
-/** 风险偏好:BTC 占比下降 = 资金轮动至山寨 = 风险偏好上升 */
+/** Risk appetite: falling BTC dominance = rotation into alts = higher risk appetite */
 export function scoreRiskAppetite(dom?: DominanceData): SignalLayer {
-  const name = '风险偏好'
+  const name = 'Risk Appetite'
   if (!dom || dom.length < 2)
-    return { name, score: 0, signal: 'neutral', detail: 'Dominance 数据不足' }
-  const change = dom[dom.length - 1].btcDominance - dom[0].btcDominance // 百分点
-  const score = clamp(-change / 3) // BTC.D 降 3pp → +1
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient dominance data' }
+  const change = dom[dom.length - 1].btcDominance - dom[0].btcDominance // percentage points
+  const score = clamp(-change / 3) // BTC.D down 3pp → +1
   return {
     name,
     score,
     signal: toSignal(score),
-    detail: `BTC 占比 ${change >= 0 ? '上升' : '下降'} ${Math.abs(change).toFixed(1)}pp,${change >= 0 ? '资金回避风险' : '资金轮动山寨'}`,
+    detail: `BTC dominance ${change >= 0 ? 'up' : 'down'} ${Math.abs(change).toFixed(1)}pp, ${change >= 0 ? 'risk-off rotation' : 'rotation into alts'}`,
   }
 }
 
-/** 市场结构:资金费率温和偏正最佳,过高=过热,转负=偏空 */
+/** Market structure: mild positive funding is best; too high = overheated, negative = bearish */
 export function scoreMarketStructure(deriv?: DerivativesData): SignalLayer {
-  const name = '市场结构'
+  const name = 'Market Structure'
   if (!deriv || deriv.length === 0)
-    return { name, score: 0, signal: 'neutral', detail: '衍生品数据不足' }
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient derivatives data' }
   const recent = deriv
     .slice(-7)
     .map((d) => d.fundingRate)
     .filter((v): v is number => v != null)
   if (recent.length === 0)
-    return { name, score: 0, signal: 'neutral', detail: '资金费率数据不足' }
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient funding data' }
   const avg = recent.reduce((a, b) => a + b, 0) / recent.length
 
   let score: number
   let note: string
   if (avg > 0.02) {
     score = -0.5
-    note = '杠杆过热'
+    note = 'leverage overheated'
   } else if (avg < 0) {
     score = -0.3
-    note = '情绪偏空'
+    note = 'bearish tilt'
   } else {
     score = clamp((avg / 0.01) * 0.8, 0, 0.8)
-    note = '杠杆健康'
+    note = 'leverage healthy'
   }
   return {
     name,
     score,
     signal: toSignal(score),
-    detail: `资金费率均值 ${avg.toFixed(3)}%,${note}`,
+    detail: `Avg funding ${avg.toFixed(3)}%, ${note}`,
   }
 }
 
-/** 情绪:恐贪指数反向指标,极度恐慌利多、极度贪婪利空 */
+/** Sentiment: Fear & Greed as a contrarian signal — extreme fear bullish, extreme greed bearish */
 export function scoreSentiment(sent?: SentimentData): SignalLayer {
-  const name = '情绪'
+  const name = 'Sentiment'
   if (!sent || sent.length === 0)
-    return { name, score: 0, signal: 'neutral', detail: '恐贪指数数据不足' }
+    return { name, score: 0, signal: 'neutral', detail: 'Insufficient Fear & Greed data' }
   const latest = sent[sent.length - 1]
-  const score = clamp((50 - latest.value) / 40) // 值10→+1(恐慌利多), 值90→-1
+  const score = clamp((50 - latest.value) / 40) // 10→+1 (fear=bullish), 90→-1
   return {
     name,
     score,
     signal: toSignal(score),
-    detail: `恐贪指数 ${latest.value}(${latest.classification}),${latest.value < 30 ? '极度恐慌,反向看多' : latest.value > 70 ? '贪婪,警惕回调' : '情绪中性'}`,
+    detail: `Fear & Greed ${latest.value} (${latest.classification}), ${latest.value < 30 ? 'extreme fear — contrarian bullish' : latest.value > 70 ? 'greed — watch for pullback' : 'neutral'}`,
   }
 }
 
-// ─── 综合汇总 ─────────────────────────────────────────────────────
+// ─── Weighted aggregate ───────────────────────────────────────────
 const WEIGHTS: Record<string, number> = {
-  流动性: 0.2,
-  机构需求: 0.25,
-  资金流入: 0.15,
-  风险偏好: 0.15,
-  市场结构: 0.15,
-  情绪: 0.1,
+  Liquidity: 0.2,
+  Institutional: 0.25,
+  'Capital Flow': 0.15,
+  'Risk Appetite': 0.15,
+  'Market Structure': 0.15,
+  Sentiment: 0.1,
 }
 
 export interface SignalInputs {

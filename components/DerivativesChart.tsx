@@ -32,10 +32,10 @@ function CustomTooltip({ active, payload, label }: any) {
     <div className="bg-bg-card border border-border-card rounded px-3 py-2 text-xs">
       <p className="text-text-muted mb-1">{label}</p>
       {fr != null && (
-        <p className="font-mono" style={{ color: FUNDING }}>资金费率: {formatFunding(fr)}</p>
+        <p className="font-mono" style={{ color: FUNDING }}>Funding: {formatFunding(fr)}</p>
       )}
       {oi != null && (
-        <p className="font-mono" style={{ color: OI }}>未平仓量: {formatOI(oi)}</p>
+        <p className="font-mono" style={{ color: OI }}>Open Interest: {formatOI(oi)}</p>
       )}
     </div>
   )
@@ -43,7 +43,7 @@ function CustomTooltip({ active, payload, label }: any) {
 
 /** 组合信号:结合 OI 趋势与资金费率水平给出一句判断 */
 function interpret(data: DerivativesData): { tone: 'up' | 'down' | 'neutral'; text: string } {
-  if (data.length < 2) return { tone: 'neutral', text: '数据不足' }
+  if (data.length < 2) return { tone: 'neutral', text: 'Insufficient data' }
   const first = data[0].openInterest
   const last = data[data.length - 1].openInterest
   const oiChange = (last - first) / first
@@ -64,16 +64,16 @@ function interpret(data: DerivativesData): { tone: 'up' | 'down' | 'neutral'; te
   const oiPct = (oiChange * 100).toFixed(1)
 
   if (oiUp && fundingHigh)
-    return { tone: 'down', text: `OI 增 ${oiPct}% 且资金费率高企(${formatFunding(avgFunding)})— 杠杆过热,警惕多头踩踏` }
+    return { tone: 'down', text: `OI up ${oiPct}% with elevated funding (${formatFunding(avgFunding)}) — leverage overheating, watch for long squeeze` }
   if (oiUp && !fundingNeg)
-    return { tone: 'up', text: `OI 增 ${oiPct}% 且资金费率温和 — 新资金进场,健康增仓` }
+    return { tone: 'up', text: `OI up ${oiPct}% with mild funding — new capital entering, healthy build-up` }
   if (oiDown && fundingNeg)
-    return { tone: 'down', text: `OI 降 ${oiPct}% 且资金费率转负 — 去杠杆,空头主导` }
+    return { tone: 'down', text: `OI down ${oiPct}% with negative funding — deleveraging, shorts in control` }
   if (oiDown)
-    return { tone: 'neutral', text: `OI 降 ${oiPct}% — 杠杆消退,持仓收缩` }
+    return { tone: 'neutral', text: `OI down ${oiPct}% — leverage receding, positions contracting` }
   if (fundingNeg)
-    return { tone: 'up', text: `资金费率转负(${formatFunding(avgFunding)})— 空头拥挤,可能酝酿轧空` }
-  return { tone: 'neutral', text: `OI 与资金费率均处中性区间` }
+    return { tone: 'up', text: `Funding turned negative (${formatFunding(avgFunding)}) — crowded shorts, potential short squeeze` }
+  return { tone: 'neutral', text: `OI and funding both in a neutral range` }
 }
 
 export default function DerivativesChart() {
@@ -157,7 +157,7 @@ export default function DerivativesChart() {
             wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }}
             formatter={(value) => (
               <span className="text-text-muted">
-                {value === 'fundingRate' ? '资金费率(8h)' : '未平仓量'}
+                {value === 'fundingRate' ? 'Funding Rate (8h)' : 'Open Interest'}
               </span>
             )}
           />
