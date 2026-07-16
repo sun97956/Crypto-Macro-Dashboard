@@ -13,28 +13,21 @@ const LOOKBACK_DAYS = 500
 const NOW_TS = Math.floor(Date.now() / 1000)
 const START_TS = NOW_TS - LOOKBACK_DAYS * 86400
 
-// 跨区域上游偶发超时,重试一次（每次 10s 超时）
-async function fetchWithRetry(
+// 跨区域上游偶发高延迟,单次给足 26s 超时（WM2NS 在 sin1 边缘缓存冷时较慢；
+// 首次慢成功后由 CDN 缓存兜住，见 GET 的 s-maxage）
+async function fetchSlow(
   url: string,
   options?: RequestInit,
-  attempts = 2
+  timeoutMs = 26000
 ): Promise<Response> {
-  let lastErr: unknown
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await upstreamFetch(url, options, 10000)
-    } catch (err) {
-      lastErr = err
-    }
-  }
-  throw lastErr
+  return upstreamFetch(url, options, timeoutMs)
 }
 
 async function fetchBtcDaily(): Promise<Map<string, number>> {
   const url = `https://pro-api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${START_TS}&to=${NOW_TS}`
-  const res = await fetchWithRetry(url, {
+  const res = await fetchSlow(url, {
     headers: { 'x-cg-pro-api-key': CG_API_KEY },
-  })
+  }, 15000)
   const json = await res.json()
 
   // 按日期取最后一个数据点
@@ -50,7 +43,7 @@ async function fetchM2Weekly(): Promise<Map<string, number>> {
   // 完全对齐可靠工作的 /api/macro/fred fetchHistory 形态（仅 desc + limit,
   // 不带 observation_start——带上后该请求在 sin1 运行时会莫名超时）
   const url = `https://api.stlouisfed.org/fred/series/observations?series_id=WM2NS&api_key=${FRED_API_KEY}&file_type=json&sort_order=desc&limit=120`
-  const res = await fetchWithRetry(url)
+  const res = await fetchSlow(url)
   const json = await res.json()
 
   const dateMap = new Map<string, number>()
@@ -109,7 +102,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       { data, updatedAt: new Date().toISOString() },
-      { headers: { 'Cache-Control': 's-maxage=300, must-revalidate' } }
+      // M2 为周度数据,长缓存:首次慢请求成功后一天内走 CDN 缓存
+      { headers: { 'Cache-Control': 's-maxage=86400, stale-while-revalidate=3600' } }
     )
   } catch (err) {
     return NextResponse.json(
