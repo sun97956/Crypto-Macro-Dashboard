@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { upstreamFetch } from '@/lib/upstream'
 import type { CryptoGlobalData } from '@/lib/types'
 
+// 强制每次请求实时执行,否则 Next.js 会在构建时静态预渲染(数据冻结在部署时刻)
+export const dynamic = 'force-dynamic'
+
 const CMC_API_KEY = process.env.CMC_API_KEY!
 
 export async function GET() {
