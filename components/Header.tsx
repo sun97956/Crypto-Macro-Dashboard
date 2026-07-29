@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { formatUpdatedAt } from '@/lib/formatters'
+import SignOutButton from './SignOutButton'
 import clsx from 'clsx'
 
 interface HeaderProps {
@@ -59,6 +60,8 @@ export default function Header({ lastUpdated, onRefreshComplete }: HeaderProps) 
           </span>
           {loading ? 'Refreshing...' : 'Refresh'}
         </button>
+
+        <SignOutButton />
       </div>
     </div>
   )
